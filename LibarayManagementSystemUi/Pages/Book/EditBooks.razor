@@ -1,0 +1,110 @@
+﻿@page "/edit-book/{id:int}"
+@using NetcodeHub.Packages.Components.Toast
+@using Application.Dtos
+@inject BookService BookService
+@inject NavigationManager Nav
+
+<NetcodeHubToast @ref="ToastComponent" Position="@ToastPosition.Top()" IconClass="bi bi-check" Persist="false" Duration="4000" />
+
+<div class="d-flex justify-content-center">
+    <div class="w-100 card border-0 p-2" style="max-width: 800px;">
+        <div class="card-header bg-success bg-gradient py-2">
+            <h2 class="text-white text-center py-2">Edit Book</h2>
+        </div>
+        <div class="card-body border p-3">
+            <EditForm Model="book" OnValidSubmit="HandleValidSubmit">
+                <DataAnnotationsValidator />
+                <ValidationSummary />
+
+                <!-- Book ID (Read-only) -->
+                <div class="form-floating mb-3">
+                    <InputNumber @bind-Value="book.Id" class="form-control border shadow" readonly />
+                    <label class="ms-2">Book ID</label>
+                </div>
+
+                <div class="form-floating mb-3">
+                    <InputText @bind-Value="book.Title" class="form-control border shadow" />
+                    <label class="ms-2">Book Title</label>
+                    <ValidationMessage For="@(() => book.Title)" class="text-danger" />
+                </div>
+
+                <div class="form-floating mb-3">
+                    <InputText @bind-Value="book.Author" class="form-control border shadow" />
+                    <label class="ms-2">Author</label>
+                    <ValidationMessage For="@(() => book.Author)" class="text-danger" />
+                </div>
+
+                <div class="form-floating mb-3">
+                    <InputText @bind-Value="book.Genre" class="form-control border shadow" />
+                    <label class="ms-2">Genre</label>
+                    <ValidationMessage For="@(() => book.Genre)" class="text-danger" />
+                </div>              
+                
+                <div class="form-floating mb-3">
+                    <InputText @bind-Value="book.ISBN" class="form-control border shadow" />
+                    <label class="ms-2">ISBN</label>
+                    <ValidationMessage For="@(() => book.ISBN)" class="text-danger" />
+                </div>
+
+                @* <!-- Category ID (Read-only) -->
+                <div class="form-floating mb-3">
+                    <InputNumber @bind-Value="book.CategoryId" class="form-control border shadow" readonly />
+                    <label class="ms-2">Category ID</label>
+                </div>
+
+                <!-- Category Name (Read-only) -->
+                <div class="form-floating mb-3">
+                    <InputText @bind-Value="book.CategoryName" class="form-control border shadow" readonly />
+                    <label class="ms-2">Category Name</label>
+                </div> *@
+
+                <div class="row pt-2 justify-content-center">
+                    <div class="col-6 col-md-4">
+                        <button type="submit" class="btn btn-success w-100">
+                            <i class="bi bi-check-circle"></i> Update
+                        </button>
+                    </div>
+                    <div class="col-6 col-md-4">
+                        <button type="button" class="btn btn-secondary w-100" @onclick="GoBack">
+                            <i class="bi bi-x-circle"></i> Cancel
+                        </button>
+                    </div>
+                </div>
+            </EditForm>
+        </div>
+    </div>
+</div>
+
+@code {
+    private BookDto book = new();
+    NetcodeHubToast? ToastComponent;
+    [Parameter] public int id { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        var result = await BookService.GetBookByIdAsync(id);
+        if (result != null)
+        {
+            book = result;
+        }
+    }
+
+    private async Task HandleValidSubmit()
+    {
+        var response = await BookService.UpdateBookAsync(id, book);
+        if (response.IsSuccessStatusCode)
+        {
+            await ToastComponent!.ShowSuccessToast("Success", "Book updated successfully!");
+            Nav.NavigateTo("/bookIndex");
+        }
+        else
+        {
+            await ToastComponent!.ShowErrorToast("Error", "Failed to update book.");
+        }
+    }
+
+    private void GoBack()
+    {
+        Nav.NavigateTo("/bookIndex");
+    }
+}

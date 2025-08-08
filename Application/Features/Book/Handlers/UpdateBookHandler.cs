@@ -33,7 +33,6 @@ namespace Application.Features.Book.Handlers
             existingBook.TotalCopies = request.BookDto.TotalCopies;
             existingBook.AvailableCopies = request.BookDto.AvailableCopies;
             existingBook.CategoryId = request.BookDto.CategoryId;
-            existingBook.CategoryName = request.BookDto.CategoryName;
 
             await _uow.Books.UpdateAsync(existingBook, cancellationToken);
             await _uow.SaveChangesAsync(cancellationToken);

@@ -25,8 +25,8 @@ namespace Domain.Entities
         // Foreign Key for Category
         [ForeignKey("Category")]
         public int CategoryId { get; set; }
-        //public Category Category { get; set; }
-        public string CategoryName { get; set; }
+        public Category Category { get; set; }
+        //public string CategoryName { get; set; }
 
         // Navigation property for Borrowing Records
         public ICollection<BorrowingRecords> borrowRecord { get; set; }

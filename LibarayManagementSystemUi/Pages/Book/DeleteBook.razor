@@ -1,0 +1,85 @@
+﻿@page "/delete-book/{id:int}"
+@using NetcodeHub.Packages.Components.Toast
+@inject BookService BookService
+@inject NavigationManager Nav
+
+<NetcodeHubToast @ref="ToastComponent" Position="@ToastPosition.Top()" IconClass="bi bi-check" Persist="false" Duration="4000" />
+
+<div class="d-flex justify-content-center">
+    <div class="w-100 card border-0 p-2" style="max-width: 500px;">
+        <div class="card-header bg-danger bg-gradient py-2">
+            <h2 class="text-white text-center py-2">Delete Book</h2>
+        </div>
+
+        <div class="card-body border p-3 text-center">
+            @if (book != null)
+            {
+                <div class="mb-3 text-start">
+                    <strong>Book ID:</strong> @book.Id  <br />
+                    <strong>Title:</strong> @book.Title <br />
+                    <strong>Author:</strong> @book.Author <br />
+                    <strong>Genre:</strong> @book.Genre <br />
+                    <strong>ISBN:</strong> @book.ISBN <br />
+                    <strong>Total Copies:</strong> @book.TotalCopies <br />
+                    <strong>Available Copies:</strong> @book.AvailableCopies <br />
+                    <strong>Category ID:</strong> @book.CategoryId <br />
+                    <strong>Category Name:</strong> @book.CategoryName
+                </div>
+
+                <p class="fw-bold text-danger">Are you sure you want to delete this book?</p>
+
+                <div class="row justify-content-center">
+                    <div class="col-6 col-md-4">
+                        <button class="btn btn-danger w-100" @onclick="Deletebook">
+                            <i class="bi bi-trash"></i> Delete
+                        </button>
+                    </div>
+                    <div class="col-6 col-md-4">
+                        <button class="btn btn-secondary w-100" @onclick="GoBack">
+                            <i class="bi bi-x-circle"></i> Cancel
+                        </button>
+                    </div>
+                </div>
+            }
+            else
+            {
+                <p>Loading book details...</p>
+            }
+        </div>
+    </div>
+</div>
+
+@code {
+    NetcodeHubToast? ToastComponent;
+    [Parameter] public int id { get; set; }
+    private BookDto? book;
+
+    protected override async Task OnInitializedAsync()
+    {
+        book = await BookService.GetBookByIdAsync(id);
+        if (book == null)
+        {
+            await ToastComponent!.ShowErrorToast("Error", "Book not found.");
+            Nav.NavigateTo("/bookIndex");
+        }
+    }
+
+    private async Task Deletebook()
+    {
+        var response = await BookService.DeleteBookAsync(id);
+        if (response.IsSuccessStatusCode)
+        {
+            await ToastComponent!.ShowSuccessToast("Success", "Book deleted successfully!");
+            Nav.NavigateTo("/bookIndex");
+        }
+        else
+        {
+            await ToastComponent!.ShowErrorToast("Error", "Failed to delete book.");
+        }
+    }
+
+    private void GoBack()
+    {
+        Nav.NavigateTo("/bookIndex");
+    }
+}

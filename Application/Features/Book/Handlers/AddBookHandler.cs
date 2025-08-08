@@ -24,8 +24,7 @@ namespace Application.Features.Book.Handlers
                 ISBN = request.BookDto.ISBN,
                 TotalCopies = request.BookDto.TotalCopies,
                 AvailableCopies = request.BookDto.AvailableCopies,
-                CategoryId = request.BookDto.CategoryId,
-                CategoryName = request.BookDto.CategoryName
+                CategoryId = request.BookDto.CategoryId
             };
 
             await _uow.Books.AddAsync(book, cancellationToken);

@@ -1,0 +1,148 @@
+﻿@page "/add-book"
+@using NetcodeHub.Packages.Components.Toast
+@using Application.Dtos.Books
+@inject BookService bookService
+@inject NavigationManager nav
+
+<NetcodeHubToast @ref="ToastComponent" Position="@ToastPosition.Top()" IconClass="bi bi-check" Persist="false" Duration="4000" />
+
+<div class="d-flex justify-content-center">
+    <div class="w-100 card border-0 p-2" style="max-width: 800px;">
+        <div class="card-header bg-primary bg-gradient py-2">
+            <h2 class="text-white text-center py-2">Add New Book</h2>
+        </div>
+        <div class="card-body border p-3">
+            <EditForm Model="book" OnValidSubmit="HandleValidSubmit">
+                <DataAnnotationsValidator />
+                <ValidationSummary />
+
+                <div class="form-floating mb-3">
+                    <InputText @bind-Value="book.Title" class="form-control border shadow" />
+                    <label class="ms-2">Title</label>
+                    <ValidationMessage For="@(() => book.Title)" class="text-danger" />
+                </div>
+
+                <div class="form-floating mb-3">
+                    <InputText @bind-Value="book.Author" class="form-control border shadow" />
+                    <label class="ms-2">Author</label>
+                    <ValidationMessage For="@(() => book.Author)" class="text-danger" />
+                </div>
+
+                <div class="form-floating mb-3">
+                    <InputText @bind-Value="book.Genre" class="form-control border shadow" />
+                    <label class="ms-2">Genre</label>
+                    <ValidationMessage For="@(() => book.Genre)" class="text-danger" />
+                </div>
+
+                <div class="form-floating mb-3">
+                    <InputText @bind-Value="book.ISBN" class="form-control border shadow" />
+                    <label class="ms-2">ISBN</label>
+                    <ValidationMessage For="@(() => book.ISBN)" class="text-danger" />
+                </div>
+
+                <div class="form-floating mb-3">
+                    <InputNumber @bind-Value="book.TotalCopies" class="form-control border shadow" />
+                    <label class="ms-2">Total Copies</label>
+                    <ValidationMessage For="@(() => book.TotalCopies)" class="text-danger" />
+                </div>
+
+                <div class="form-floating mb-3">
+                    <InputNumber @bind-Value="book.AvailableCopies" class="form-control border shadow" />
+                    <label class="ms-2">Available Copies</label>
+                    <ValidationMessage For="@(() => book.AvailableCopies)" class="text-danger" />
+                </div>
+
+                <div class="form-floating mb-3">
+                    <InputSelect @bind-Value="book.CategoryId" class="form-control border shadow" @onchange="OnCategoryIdChanged">
+                        <option value="">-- Select Category ID --</option>
+                        @foreach (var cat in categories)
+                        {
+                            <option value="@cat.Id">@cat.Id</option>
+                        }
+                    </InputSelect>
+                    <label class="ms-2">Category ID</label>
+                </div>
+
+                <div class="form-floating mb-3">
+                    <InputSelect @bind-Value="book.CategoryName" class="form-control border shadow" @onchange="OnCategoryNameChanged">
+                        <option value="">-- Select Category Name --</option>
+                        @foreach (var cat in categories)
+                        {
+                            <option value="@cat.Name">@cat.Name</option>
+                        }
+                    </InputSelect>
+                    <label class="ms-2">Category Name</label>
+                </div>
+
+
+                @* <div class="form-floating mb-3">
+                    <InputText @bind-Value="book.CategoryName" class="form-control border shadow" readonly />
+                    <label class="ms-2">Category Name</label>
+                </div> *@
+
+
+                <div class="row pt-2 justify-content-center">
+                    <div class="col-6 col-md-4">
+                        <button type="submit" class="btn btn-primary w-100">
+                            <i class="bi bi-check-circle"></i> Save
+                        </button>
+                    </div>
+                    <div class="col-6 col-md-4">
+                        <button type="button" class="btn btn-secondary w-100" @onclick="GoBack">
+                            <i class="bi bi-x-circle"></i> Cancel
+                        </button>
+                    </div>
+                </div>
+            </EditForm>
+        </div>
+    </div>
+</div>
+@code {
+    private BookDto book = new();
+    NetcodeHubToast? ToastComponent;
+    private List<CategoryDto> categories = new();
+
+    [Inject] CategoryService CategoryService { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        categories = await CategoryService.GetCategoriesAsync();
+    }
+
+    private async Task HandleValidSubmit()
+    {
+        var response = await bookService.AddBookAsync(book);
+        if (response.IsSuccessStatusCode)
+        {
+            await ToastComponent!.ShowSuccessToast("Success", "Book added successfully!");
+            nav.NavigateTo("/bookIndex");
+        }
+        else
+        {
+            await ToastComponent!.ShowErrorToast("Error", "Failed to add book.");
+        }
+    }
+
+    private void OnCategoryIdChanged(ChangeEventArgs e)
+    {
+        if (int.TryParse(e.Value?.ToString(), out var selectedId))
+        {
+            book.CategoryId = selectedId;
+            var selectedCategory = categories.FirstOrDefault(c => c.Id == selectedId);
+            book.CategoryName = selectedCategory?.Name ?? string.Empty;
+        }
+    }
+
+    private void OnCategoryNameChanged(ChangeEventArgs e)
+    {
+        var selectedName = e.Value?.ToString();
+        book.CategoryName = selectedName ?? string.Empty;
+        var selectedCategory = categories.FirstOrDefault(c => c.Name == selectedName);
+        book.CategoryId = selectedCategory?.Id ?? 0;
+    }
+
+    private void GoBack()
+    {
+        nav.NavigateTo("/bookIndex");
+    }
+}
