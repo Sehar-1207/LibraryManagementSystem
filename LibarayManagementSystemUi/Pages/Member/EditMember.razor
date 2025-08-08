@@ -1,0 +1,93 @@
+﻿@page "/edit-member/{id:int}"
+@using Application.Dtos
+@using NetcodeHub.Packages.Components.Toast
+@inject MemberService memberService
+@inject NavigationManager Nav
+
+<NetcodeHubToast @ref="ToastComponent" Position="@ToastPosition.Top()" IconClass="bi bi-pencil" Persist="false" Duration="4000" />
+
+@if (member == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <div class="d-flex justify-content-center">
+        <div class="w-100 card border-0 p-2" style="max-width: 800px;">
+            <div class="card-header bg-primary bg-gradient py-2">
+                <h2 class="text-white text-center py-2">Edit Member</h2>
+            </div>
+            <div class="card-body border p-3">
+                <EditForm Model="member" OnValidSubmit="HandleValidSubmit">
+                    <DataAnnotationsValidator />
+                    <ValidationSummary />
+
+                    <!-- Read-only Member ID -->
+                    <div class="form-floating mb-3">
+                        <input type="text" value="@member.Id" class="form-control border shadow" readonly />
+                        <label class="ms-2">Member ID</label>
+                    </div>
+
+
+                    <!-- Editable Member Name -->
+                    <div class="form-floating mb-3">
+                        <InputText @bind-Value="member.FullName" class="form-control border shadow" />
+                        <label class="ms-2">Member Name</label>
+                        <ValidationMessage For="@(() => member.FullName)" class="text-danger" />
+                    </div>
+
+                    <div class="form-floating mb-3">
+                        <InputText @bind-Value="member.Email" class="form-control border shadow" />
+                        <label class="ms-2">Member Email</label>
+                        <ValidationMessage For="@(() => member.Email)" class="text-danger" />
+                    </div>
+                    <!-- Submit and Cancel Buttons -->
+                    <div class="row pt-2 justify-content-center">
+                        <div class="col-6 col-md-4">
+                            <button type="submit" class="btn btn-primary w-100">
+                                <i class="bi bi-check-circle"></i> Update
+                            </button>
+                        </div>
+                        <div class="col-6 col-md-4">
+                            <button type="button" class="btn btn-secondary w-100" @onclick="GoBack">
+                                <i class="bi bi-x-circle"></i> Cancel
+                            </button>
+                        </div>
+                    </div>
+                </EditForm>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    [Parameter]
+    public int id { get; set; }
+
+    private MemberDto? member;
+    NetcodeHubToast? ToastComponent;
+
+    protected override async Task OnInitializedAsync()
+    {
+        member = await memberService.GetById(id);
+    }
+
+    private async Task HandleValidSubmit()
+    {
+        var response = await memberService.Update(id,member);
+        if (response)
+        {
+            await ToastComponent!.ShowSuccessToast("Updated", "Member updated successfully!");
+            Nav.NavigateTo("/memberIndex");
+        }
+        else
+        {
+            await ToastComponent!.ShowErrorToast("Error", "Failed to update member.");
+        }
+    }
+
+    private void GoBack()
+    {
+        Nav.NavigateTo("/memberIndex");
+    }
+}

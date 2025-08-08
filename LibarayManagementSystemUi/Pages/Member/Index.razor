@@ -1,0 +1,77 @@
+﻿@page "/memberIndex"
+@inject MemberService MemberService
+@inject NavigationManager Nav
+@using Application.Dtos
+
+<div class="d-flex justify-content-center mt-4">
+    <div class="w-100 card border-0 p-2" style="max-width: 1100px;">
+        <div class="card-header bg-success bg-gradient py-2">
+            <div class="row">
+                <div class="col-12 text-center">
+                    <h2 class="text-white py-2">Member List</h2>
+                </div>
+            </div>
+        </div>
+
+        <div class="card-body border p-2">
+            <div class="row pb-2">
+                <div class="col-6 offset-6 text-end">
+                    <a class="btn btn-success bg-gradient mb-2" href="/add-member">
+                        <i class="bi bi-plus-circle"></i> Add New Member
+                    </a>
+                </div>
+            </div>
+
+            @if (members == null)
+            {
+                <p><em>Loading...</em></p>
+            }
+            else if (members.Count == 0)
+            {
+                <p>Loading Members .....</p>
+            }
+            else
+            {
+                <table class="table table-bordered table-striped">
+                    <thead class="bg-success bg-gradient text-white">
+                        <tr>
+                            <th>Member ID</th>
+                            <th>Full Name</th>
+                            <th>Email</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var m in members)
+                        {
+                            <tr>
+                                <td>@m.Id</td>
+                                <td>@m.FullName</td>
+                                <td>@m.Email</td>
+                                <td>
+                                    <div class="d-flex gap-2 justify-content-start">
+                                        <a class="btn btn-sm btn-success" href="/edit-member/@m.Id">
+                                            <i class="bi bi-pencil-square"></i> Edit
+                                        </a>
+                                        <a class="btn btn-sm btn-danger" href="/delete-member/@m.Id">
+                                            <i class="bi bi-trash"></i> Delete
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            }
+        </div>
+    </div>
+</div>
+
+@code {
+    List<MemberDto> members = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        members = await MemberService.GetAll();
+    }
+}

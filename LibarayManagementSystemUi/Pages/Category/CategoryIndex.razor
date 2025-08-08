@@ -1,0 +1,75 @@
+﻿@page "/categoryIndex"
+@inject CategoryService CategoryService
+@inject NavigationManager Nav
+
+<div class="d-flex justify-content-center mt-4">
+    <div class="w-100 card border-0 p-2" style="max-width: 1100px;">
+        <div class="card-header bg-success bg-gradient py-2">
+            <div class="row">
+                <div class="col-12 text-center">
+                    <h2 class="text-white py-2">Category List</h2>
+                </div>
+            </div>
+        </div>
+
+        <div class="card-body border p-2">
+            <div class="row pb-2">
+                <div class="col-6 offset-6 text-end">
+                    <a class="btn btn-success bg-gradient mb-2" href="/add-category">
+                        <i class="bi bi-plus-circle"></i> Add New Category
+                    </a>
+                </div>
+            </div>
+
+            @if (categories == null)
+            {
+                <p><em>Loading...</em></p>
+            }
+            else
+            {
+                <table class="table table-bordered table-striped">
+                    <thead class="bg-success bg-gradient text-white">
+                        <tr>
+                            <th>Category ID</th>
+                            <th>Category Name</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var cat in categories)
+                        {
+                            <tr>
+                                <td>@cat.Id</td>
+                                <td>@cat.Name</td>
+                                <td>
+                                    <div class="d-flex gap-2 justify-content-start">
+                                        <a class="btn btn-sm btn-success" href="/edit-category/@cat.Id">
+                                            <i class="bi bi-pencil-square"></i> Edit
+                                        </a>
+                                        <button class="btn btn-sm btn-danger" @onclick="() => NavigateToDelete(cat.Id)">
+                                            <i class="bi bi-trash"></i> Delete
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            }
+        </div>
+    </div>
+</div>
+
+@code {
+    List<CategoryDto> categories;
+
+    protected override async Task OnInitializedAsync()
+    {
+        categories = await CategoryService.GetCategoriesAsync();
+    }
+
+    private void NavigateToDelete(int id)
+    {
+        Nav.NavigateTo($"/DeleteCategory/{id}");
+    }
+}

@@ -1,0 +1,61 @@
+﻿@page "/add-category"
+@using NetcodeHub.Packages.Components.Toast
+@inject CategoryService CategoryService
+@inject NavigationManager Nav
+
+<NetcodeHubToast @ref="ToastComponent" Position="@ToastPosition.Top()" IconClass="bi bi-check" Persist="false" Duration="4000" />
+
+<div class="d-flex justify-content-center">
+    <div class="w-100 card border-0 p-2" style="max-width: 800px;">
+        <div class="card-header bg-success bg-gradient py-2">
+            <h2 class="text-white text-center py-2">Create Category</h2>
+        </div>
+        <div class="card-body border p-3">
+            <EditForm Model="category" OnValidSubmit="HandleValidSubmit">
+                <DataAnnotationsValidator />
+                <ValidationSummary />
+                <div class="form-floating mb-3">
+                    <InputText @bind-Value="category.Name" class="form-control border shadow" />
+                    <label class="ms-2">Category Name</label>
+                    <ValidationMessage For="@(() => category.Name)" class="text-danger" />
+                </div>
+                <div class="row pt-2 justify-content-center">
+                    <div class="col-6 col-md-4">
+                        <button type="submit" class="btn btn-success w-100">
+                            <i class="bi bi-check-circle"></i> Create
+                        </button>
+                    </div>
+                    <div class="col-6 col-md-4">
+                        <button type="button" class="btn btn-secondary w-100" @onclick="GoBack">
+                            <i class="bi bi-x-circle"></i> Cancel
+                        </button>
+                    </div>
+                </div>
+            </EditForm>
+        </div>
+    </div>
+</div>
+
+@code {
+    private CategoryDto category = new();
+    NetcodeHubToast? ToastComponent;
+
+    private async Task HandleValidSubmit()
+    {
+        var response = await CategoryService.AddCategoryAsync(category);
+        if (response.IsSuccessStatusCode)
+        {
+            await ToastComponent!.ShowSuccessToast("Success", "Category added successfully!");
+            Nav.NavigateTo("/categoryIndex");
+        }
+        else
+        {
+            await ToastComponent!.ShowErrorToast("Error", "Failed to add category.");
+        }
+    }
+
+    private void GoBack()
+    {
+        Nav.NavigateTo("/categoryIndex");
+    }
+}

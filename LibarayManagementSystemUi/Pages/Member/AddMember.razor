@@ -1,0 +1,70 @@
+﻿@page "/add-member"
+@using NetcodeHub.Packages.Components.Toast
+@inject MemberService MemberService
+@inject NavigationManager Nav
+@using Application.Dtos
+
+<NetcodeHubToast @ref="ToastComponent" Position="@ToastPosition.Top()" IconClass="bi bi-check-circle" Persist="false" Duration="4000" />
+
+<div class="d-flex justify-content-center mt-4">
+    <div class="w-100 card border-0 p-2" style="max-width: 800px;">
+        <div class="card-header bg-primary bg-gradient py-2">
+            <h2 class="text-white text-center py-2">Add New Member</h2>
+        </div>
+        <div class="card-body border p-3">
+            <EditForm Model="member" OnValidSubmit="HandleSubmit">
+                <DataAnnotationsValidator />
+                <ValidationSummary />
+
+                <div class="mb-3">
+                    <label class="form-label">Full Name</label>
+                    <InputText class="form-control" @bind-Value="member.FullName" />
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Email</label>
+                    <InputText class="form-control" @bind-Value="member.Email" />
+                </div>
+
+                <div class="row pt-2">
+                    <div class="col-6">
+                        <button type="submit" class="btn btn-primary w-100">
+                            <i class="bi bi-plus-circle"></i> Save
+                        </button>
+                    </div>
+                    <div class="col-6">
+                        <button type="button" class="btn btn-secondary w-100" @onclick="GoBack">
+                            <i class="bi bi-x-circle"></i> Cancel
+                        </button>
+                    </div>
+                </div>
+            </EditForm>
+        </div>
+    </div>
+</div>
+
+@code {
+    private MemberDto member = new();
+    NetcodeHubToast? ToastComponent;
+
+    private async Task HandleSubmit()
+    {
+        var result = await MemberService.Add(member);
+
+        if (result)
+        {
+            await ToastComponent!.ShowSuccessToast("Success", "Member added successfully!");
+            await Task.Delay(1500); // small delay to show toast before redirect
+            Nav.NavigateTo("/memberIndex");
+        }
+        else
+        {
+            await ToastComponent!.ShowErrorToast("Error", "Failed to add member.");
+        }
+    }
+
+    private void GoBack()
+    {
+        Nav.NavigateTo("/memberIndex");
+    }
+}

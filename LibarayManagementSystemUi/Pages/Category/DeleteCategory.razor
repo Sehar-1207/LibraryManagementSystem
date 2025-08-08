@@ -1,0 +1,62 @@
+﻿@page "/DeleteCategory/{Id:int}"
+@using NetcodeHub.Packages.Components.Toast
+@inject CategoryService CategoryService
+@inject NavigationManager Nav
+
+<NetcodeHubToast @ref="ToastComponent" Position="@ToastPosition.Top()" IconClass="bi bi-trash" Duration="4000" />
+
+<div class="d-flex justify-content-center">
+    <div class="w-100 card border-0 p-2" style="max-width: 800px;">
+        <div class="card-header bg-danger bg-gradient py-2">
+            <h2 class="text-white text-center py-2">Delete Category</h2>
+        </div>
+        <div class="card-body border p-3 text-center">
+            <p>Are you sure you want to delete the category "<strong>@category.Name</strong>"?</p>
+            <div class="row pt-2 justify-content-center">
+                <div class="col-6 col-md-4">
+                    <button class="btn btn-danger w-100" @onclick="Deletecategory">
+                        <i class="bi bi-trash3"></i> Delete
+                    </button>
+                </div>
+                <div class="col-6 col-md-4">
+                    <button class="btn btn-secondary w-100" @onclick="GoBack">
+                        <i class="bi bi-x-circle"></i> Cancel
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter]
+    public int id { get; set; }
+
+    private CategoryDto category = new();
+    NetcodeHubToast? ToastComponent;
+
+    protected override async Task OnInitializedAsync()
+    {
+        category = await CategoryService.GetCategoryByIdAsync(id);
+    }
+
+    private async Task Deletecategory()
+    {
+        var response = await CategoryService.DeleteCategoryAsync(id);
+        if (response.IsSuccessStatusCode)
+        {
+            await ToastComponent!.ShowSuccessToast("Deleted", "Category deleted successfully!");
+        }
+        else
+        {
+            await ToastComponent!.ShowErrorToast("Error", "Failed to delete category.");
+        }
+
+        Nav.NavigateTo("/categoryIndex");
+    }
+
+    private void GoBack()
+    {
+        Nav.NavigateTo("/categoryIndex");
+    }
+}

@@ -1,0 +1,69 @@
+﻿@page "/EditCategory/{Id:int}"
+@using NetcodeHub.Packages.Components.Toast
+@inject CategoryService CategoryService
+@inject NavigationManager Nav
+
+<NetcodeHubToast @ref="ToastComponent" Position="@ToastPosition.Top()" IconClass="bi bi-info-circle" Duration="4000" />
+
+<div class="d-flex justify-content-center">
+    <div class="w-100 card border-0 p-2" style="max-width: 800px;">
+        <div class="card-header bg-warning bg-gradient py-2">
+            <h2 class="text-white text-center py-2">Edit Category</h2>
+        </div>
+        <div class="card-body border p-3">
+            <EditForm Model="category" OnValidSubmit="HandleValidSubmit">
+                <DataAnnotationsValidator />
+                <ValidationSummary />
+                <div class="form-floating mb-3">
+                    <InputText @bind-Value="category.Name" class="form-control border shadow" />
+                    <label class="ms-2">Category Name</label>
+                    <ValidationMessage For="@(() => category.Name)" class="text-danger" />
+                </div>
+                <div class="row pt-2 justify-content-center">
+                    <div class="col-6 col-md-4">
+                        <button type="submit" class="btn btn-warning w-100">
+                            <i class="bi bi-pencil-square"></i> Update
+                        </button>
+                    </div>
+                    <div class="col-6 col-md-4">
+                        <button type="button" class="btn btn-secondary w-100" @onclick="GoBack">
+                            <i class="bi bi-x-circle"></i> Cancel
+                        </button>
+                    </div>
+                </div>
+            </EditForm>
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter]
+    public int id { get; set; }
+
+    private CategoryDto category = new();
+    NetcodeHubToast? ToastComponent;
+
+    protected override async Task OnInitializedAsync()
+    {
+        category = await CategoryService.GetCategoryByIdAsync(id);
+    }
+
+    private async Task HandleValidSubmit()
+    {
+        var response = await CategoryService.UpdateCategoryAsync(id, category);
+        if (response.IsSuccessStatusCode)
+        {
+            await ToastComponent!.ShowSuccessToast("Updated", "Category updated successfully!");
+            Nav.NavigateTo("/categoryIndex");
+        }
+        else
+        {
+            await ToastComponent!.ShowErrorToast("Error", "Failed to update category.");
+        }
+    }
+
+    private void GoBack()
+    {
+        Nav.NavigateTo("/categoryIndex");
+    }
+}
