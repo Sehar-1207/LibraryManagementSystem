@@ -1,7 +1,7 @@
 ﻿using Application.Dtos.Books;
 using System.Net.Http.Json;
 
-namespace LibarayManagementSystemUi.Services
+namespace LibraryManagementSystemUi.Services
 {
     public class CategoryService
     {

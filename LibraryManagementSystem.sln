@@ -11,7 +11,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Application", "Application\
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Infrastructure", "Infrastructure\Infrastructure.csproj", "{B9353E7D-9D9C-4992-ABC9-945055346177}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LibarayManagementSystemUi", "LibarayManagementSystemUi\LibarayManagementSystemUi.csproj", "{50AC179D-A60A-4DA5-BB60-839739B34730}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LibraryManagementSystemUi", "LibarayManagementSystemUi\LibraryManagementSystemUi.csproj", "{50AC179D-A60A-4DA5-BB60-839739B34730}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

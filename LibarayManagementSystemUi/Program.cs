@@ -1,5 +1,5 @@
-using LibarayManagementSystemUi;
-using LibarayManagementSystemUi.Services;
+using LibraryManagementSystemUi.Services;
+using LibraryManagementSystemUi;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 

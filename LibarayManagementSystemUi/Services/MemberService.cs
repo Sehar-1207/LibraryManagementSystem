@@ -2,7 +2,7 @@
 using Application.Services;
 using System.Net.Http.Json;
 
-namespace LibarayManagementSystemUi.Services
+namespace LibraryManagementSystemUi.Services
 {
     public class MemberService
     {
