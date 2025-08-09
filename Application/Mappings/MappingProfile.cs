@@ -13,7 +13,6 @@ namespace Application.Mappings
 
             // Category mappings (including Books)
             CreateMap<Category, CategoryDto>()
-                .ForMember(dest => dest.Books, opt => opt.MapFrom(src => src.Books))
                 .ReverseMap();
         }
     }

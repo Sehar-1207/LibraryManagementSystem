@@ -67,7 +67,7 @@
     private async Task Deletebook()
     {
         var response = await BookService.DeleteBookAsync(id);
-        if (response.IsSuccessStatusCode)
+        if (response)
         {
             await ToastComponent!.ShowSuccessToast("Success", "Book deleted successfully!");
             Nav.NavigateTo("/bookIndex");

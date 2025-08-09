@@ -1,107 +1,152 @@
 ﻿@page "/edit-book/{id:int}"
 @using NetcodeHub.Packages.Components.Toast
-@using Application.Dtos
 @inject BookService BookService
+@inject CategoryService CategoryService
 @inject NavigationManager Nav
 
-<NetcodeHubToast @ref="ToastComponent" Position="@ToastPosition.Top()" IconClass="bi bi-check" Persist="false" Duration="4000" />
+<NetcodeHubToast @ref="ToastComponent" Position="@ToastPosition.Top()" IconClass="bi bi-info-circle" Duration="4000" />
 
 <div class="d-flex justify-content-center">
     <div class="w-100 card border-0 p-2" style="max-width: 800px;">
-        <div class="card-header bg-success bg-gradient py-2">
+        <div class="card-header bg-warning bg-gradient py-2">
             <h2 class="text-white text-center py-2">Edit Book</h2>
         </div>
+
         <div class="card-body border p-3">
-            <EditForm Model="book" OnValidSubmit="HandleValidSubmit">
-                <DataAnnotationsValidator />
-                <ValidationSummary />
+            @if (!isLoaded)
+            {
+                <p>Loading book data...</p>
+            }
+            else if (loadError != null)
+            {
+                <p class="text-danger">@loadError</p>
+            }
+            else
+            {
+                <EditForm Model="book" OnValidSubmit="HandleValidSubmit">
+                    <DataAnnotationsValidator />
+                    <ValidationSummary />
 
-                <!-- Book ID (Read-only) -->
-                <div class="form-floating mb-3">
-                    <InputNumber @bind-Value="book.Id" class="form-control border shadow" readonly />
-                    <label class="ms-2">Book ID</label>
-                </div>
-
-                <div class="form-floating mb-3">
-                    <InputText @bind-Value="book.Title" class="form-control border shadow" />
-                    <label class="ms-2">Book Title</label>
-                    <ValidationMessage For="@(() => book.Title)" class="text-danger" />
-                </div>
-
-                <div class="form-floating mb-3">
-                    <InputText @bind-Value="book.Author" class="form-control border shadow" />
-                    <label class="ms-2">Author</label>
-                    <ValidationMessage For="@(() => book.Author)" class="text-danger" />
-                </div>
-
-                <div class="form-floating mb-3">
-                    <InputText @bind-Value="book.Genre" class="form-control border shadow" />
-                    <label class="ms-2">Genre</label>
-                    <ValidationMessage For="@(() => book.Genre)" class="text-danger" />
-                </div>              
-                
-                <div class="form-floating mb-3">
-                    <InputText @bind-Value="book.ISBN" class="form-control border shadow" />
-                    <label class="ms-2">ISBN</label>
-                    <ValidationMessage For="@(() => book.ISBN)" class="text-danger" />
-                </div>
-
-                @* <!-- Category ID (Read-only) -->
-                <div class="form-floating mb-3">
-                    <InputNumber @bind-Value="book.CategoryId" class="form-control border shadow" readonly />
-                    <label class="ms-2">Category ID</label>
-                </div>
-
-                <!-- Category Name (Read-only) -->
-                <div class="form-floating mb-3">
-                    <InputText @bind-Value="book.CategoryName" class="form-control border shadow" readonly />
-                    <label class="ms-2">Category Name</label>
-                </div> *@
-
-                <div class="row pt-2 justify-content-center">
-                    <div class="col-6 col-md-4">
-                        <button type="submit" class="btn btn-success w-100">
-                            <i class="bi bi-check-circle"></i> Update
-                        </button>
+                    <div class="form-floating mb-3">
+                        <InputText @bind-Value="book.Title" class="form-control border shadow" />
+                        <label class="ms-2">Title</label>
+                        <ValidationMessage For="@(() => book.Title)" class="text-danger" />
                     </div>
-                    <div class="col-6 col-md-4">
-                        <button type="button" class="btn btn-secondary w-100" @onclick="GoBack">
-                            <i class="bi bi-x-circle"></i> Cancel
-                        </button>
+
+                    <div class="form-floating mb-3">
+                        <InputText @bind-Value="book.Author" class="form-control border shadow" />
+                        <label class="ms-2">Author</label>
+                        <ValidationMessage For="@(() => book.Author)" class="text-danger" />
                     </div>
-                </div>
-            </EditForm>
+
+                    <div class="form-floating mb-3">
+                        <InputText @bind-Value="book.Genre" class="form-control border shadow" />
+                        <label class="ms-2">Genre</label>
+                        <ValidationMessage For="@(() => book.Genre)" class="text-danger" />
+                    </div>
+
+                    <div class="form-floating mb-3">
+                        <InputText @bind-Value="book.ISBN" class="form-control border shadow" />
+                        <label class="ms-2">ISBN</label>
+                        <ValidationMessage For="@(() => book.ISBN)" class="text-danger" />
+                    </div>
+
+                    <div class="form-floating mb-3">
+                        <InputNumber @bind-Value="book.TotalCopies" class="form-control border shadow" />
+                        <label class="ms-2">Total Copies</label>
+                        <ValidationMessage For="@(() => book.TotalCopies)" class="text-danger" />
+                    </div>
+
+                    <div class="form-floating mb-3">
+                        <InputNumber @bind-Value="book.AvailableCopies" class="form-control border shadow" />
+                        <label class="ms-2">Available Copies</label>
+                        <ValidationMessage For="@(() => book.AvailableCopies)" class="text-danger" />
+                    </div>
+
+                    <div class="form-floating mb-3">
+                        <InputSelect @bind-Value="book.CategoryId" class="form-control border shadow">
+                            <option value="0">-- Select Category --</option>
+                            @foreach (var cat in categories)
+                            {
+                                <option value="@cat.Id">@cat.Name</option>
+                            }
+                        </InputSelect>
+                        <label class="ms-2">Category</label>
+                        <ValidationMessage For="@(() => book.CategoryId)" class="text-danger" />
+                    </div>
+
+                    <div class="row pt-2 justify-content-center">
+                        <div class="col-6 col-md-4">
+                            <button type="submit" class="btn btn-warning w-100">
+                                <i class="bi bi-pencil-square"></i> Update
+                            </button>
+                        </div>
+                        <div class="col-6 col-md-4">
+                            <button type="button" class="btn btn-secondary w-100" @onclick="GoBack">
+                                <i class="bi bi-x-circle"></i> Cancel
+                            </button>
+                        </div>
+                    </div>
+                </EditForm>
+            }
         </div>
     </div>
 </div>
 
 @code {
-    private BookDto book = new();
-    NetcodeHubToast? ToastComponent;
-    [Parameter] public int id { get; set; }
+    [Parameter]
+    public int id { get; set; }
 
-    protected override async Task OnInitializedAsync()
+    private BookDto book = new();
+    private List<CategoryDto> categories = new();
+    private bool isLoaded = false;
+    private string? loadError;
+    NetcodeHubToast? ToastComponent;
+
+    protected override async Task OnParametersSetAsync()
     {
-        var result = await BookService.GetBookByIdAsync(id);
-        if (result != null)
+        try
         {
-            book = result;
+            book = await BookService.GetBookByIdAsync(id);
+            categories = await CategoryService.GetCategoriesAsync();
+            if (book.CategoryId == 0) book.CategoryId = 0;
+            isLoaded = true;
+        }
+        catch (Exception ex)
+        {
+            loadError = $"Error loading data: {ex.Message}";
         }
     }
 
     private async Task HandleValidSubmit()
     {
-        var response = await BookService.UpdateBookAsync(id, book);
-        if (response.IsSuccessStatusCode)
+        try
         {
-            await ToastComponent!.ShowSuccessToast("Success", "Book updated successfully!");
-            Nav.NavigateTo("/bookIndex");
+            // Make sure CategoryName is populated before sending
+            var selectedCategory = categories.FirstOrDefault(c => c.Id == book.CategoryId);
+            if (selectedCategory != null)
+            {
+                book.CategoryName = selectedCategory.Name;
+            }
+
+            bool response = await BookService.UpdateBookAsync(book.Id, book);
+
+            if (response)
+            {
+                await ToastComponent!.ShowSuccessToast("Updated", "Book updated successfully!");
+                Nav.NavigateTo("/bookIndex");
+            }
+            else
+            {
+                await ToastComponent!.ShowErrorToast("Error", "Failed to update book.");
+            }
         }
-        else
+        catch (Exception ex)
         {
-            await ToastComponent!.ShowErrorToast("Error", "Failed to update book.");
+            await ToastComponent!.ShowErrorToast("Error", $"Failed to update: {ex.Message}");
         }
     }
+
 
     private void GoBack()
     {

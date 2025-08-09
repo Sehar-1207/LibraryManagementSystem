@@ -2,6 +2,8 @@
 using Application.Services;
 using Domain.Entities;
 using MediatR;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Application.Features.Category.Handlers
 {
@@ -16,6 +18,12 @@ namespace Application.Features.Category.Handlers
 
         public async Task<ServiceResponse<int>> Handle(UpdateCategoryCommand request, CancellationToken cancellationToken)
         {
+            // Optionally: fetch existing entity first to validate existence or update selectively
+            // var existingCategory = await _unitOfWork.Category.GetByIdAsync(request.Id, cancellationToken);
+            // if (existingCategory == null) { return new ServiceResponse<int> { Success = false, Message = "Category not found." }; }
+            // existingCategory.Name = request.Name;
+            // await _unitOfWork.Category.UpdateAsync(existingCategory, cancellationToken);
+
             var category = new Domain.Entities.Category
             {
                 Id = request.Id,

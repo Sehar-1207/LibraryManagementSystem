@@ -24,12 +24,12 @@
 
             @if (books == null)
             {
-                <p><em>Loading...</em></p>
+                <p>No books found.</p>
             }
 
-            else if (books.Count < 0)
+            else if (books.Count == 0)
             {
-                <p>No books found.</p>
+                <p><em>Loading...</em></p>
             }
             else
             {

@@ -74,13 +74,6 @@
                     <label class="ms-2">Category Name</label>
                 </div>
 
-
-                @* <div class="form-floating mb-3">
-                    <InputText @bind-Value="book.CategoryName" class="form-control border shadow" readonly />
-                    <label class="ms-2">Category Name</label>
-                </div> *@
-
-
                 <div class="row pt-2 justify-content-center">
                     <div class="col-6 col-md-4">
                         <button type="submit" class="btn btn-primary w-100">
@@ -112,7 +105,7 @@
     private async Task HandleValidSubmit()
     {
         var response = await bookService.AddBookAsync(book);
-        if (response.IsSuccessStatusCode)
+        if (response)
         {
             await ToastComponent!.ShowSuccessToast("Success", "Book added successfully!");
             nav.NavigateTo("/bookIndex");

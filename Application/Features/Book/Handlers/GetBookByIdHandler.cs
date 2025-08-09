@@ -17,7 +17,8 @@ namespace Application.Features.Book.Handlers
         public async Task<BookDto?> Handle(GetBookByIdQuery request, CancellationToken cancellationToken)
         {
             var book = await _uow.Books.GetByIdAsync(request.Id, cancellationToken);
-            if (book == null) return null;
+            if (book == null)
+                return null;
 
             return new BookDto
             {
@@ -27,7 +28,9 @@ namespace Application.Features.Book.Handlers
                 Genre = book.Genre,
                 ISBN = book.ISBN,
                 TotalCopies = book.TotalCopies,
-                AvailableCopies = book.AvailableCopies
+                AvailableCopies = book.AvailableCopies,
+                CategoryId = book.CategoryId,
+                CategoryName = book.Category?.Name // assuming navigation property exists
             };
         }
     }

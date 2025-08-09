@@ -1,6 +1,4 @@
 ﻿using Application.Contracts.Interfaces;
-using Application.Dtos.Books;
-using Application.Services;
 using Domain.Entities;
 using Infrastructure.DataAccess;
 using Microsoft.EntityFrameworkCore;
@@ -19,14 +17,14 @@ namespace Infrastructure.Implementation.Repositories
         public async Task<List<Category>> GetAllAsync(CancellationToken cancellationToken)
         {
             return await _db.Categories
-                            .Include(c => c.Books) // Include books for relationship
+                            .Include(c => c.Books) // Include related books
                             .ToListAsync(cancellationToken);
         }
 
         public async Task<Category?> GetByIdAsync(int id, CancellationToken cancellationToken)
         {
             return await _db.Categories
-                            .Include(c => c.Books) // Include books for relationship
+                            .Include(c => c.Books) // Include related books
                             .FirstOrDefaultAsync(c => c.Id == id, cancellationToken);
         }
 
@@ -35,10 +33,11 @@ namespace Infrastructure.Implementation.Repositories
             await _db.Categories.AddAsync(category, cancellationToken);
         }
 
-        public async Task UpdateAsync(Category category, CancellationToken cancellationToken)
+        public Task UpdateAsync(Category category, CancellationToken cancellationToken)
         {
+            // Update is synchronous, no await needed here
             _db.Categories.Update(category);
-            await Task.CompletedTask;
+            return Task.CompletedTask;
         }
 
         public async Task DeleteAsync(int id, CancellationToken cancellationToken)
@@ -47,8 +46,9 @@ namespace Infrastructure.Implementation.Repositories
                                     .Include(c => c.Books)
                                     .FirstOrDefaultAsync(c => c.Id == id, cancellationToken);
             if (category != null)
+            {
                 _db.Categories.Remove(category);
+            }
         }
     }
 }
-

@@ -3,6 +3,8 @@ using Application.Features.Categories.Command;
 using Application.Services;
 using Domain.Entities;
 using MediatR;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Application.Features.Category.Handlers
 {
@@ -17,7 +19,7 @@ namespace Application.Features.Category.Handlers
 
         public async Task<ServiceResponse<int>> Handle(CreateCategoryCommand request, CancellationToken cancellationToken)
         {
-            var category = new Domain.Entities.Category
+            var category = new  Domain.Entities.Category
             {
                 Name = request.Name
             };
