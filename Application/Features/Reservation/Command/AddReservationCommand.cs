@@ -10,6 +10,8 @@ namespace Application.Features.Reservation.Command
         public int MemberId { get; set; }
         public DateTime ReservationDate { get; set; }
         public DateTime ExpirationDate { get; set; }
+        public bool IsNotified { get; set; } = false; // Default to false
+        public bool IsCompleted { get; set; } = false; // Default to false
     }
 }
 

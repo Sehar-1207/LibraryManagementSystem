@@ -26,6 +26,26 @@ namespace LibraryManagementSystem.Controllers
             return Ok(response);
         }
 
+        // ✅ Update (Edit) reservation
+        [HttpPut("edit/{id}")]
+        public async Task<ActionResult<ServiceResponse<int>>> EditReservation(int id, [FromBody] UpdateReservationCommand command)
+        {
+            if (id != command.Id)
+                return BadRequest("Reservation ID mismatch.");
+
+            var response = await _mediator.Send(command);
+            return Ok(response);
+        }
+
+        // ✅ Delete reservation
+        [HttpDelete("delete/{id}")]
+        public async Task<ActionResult<ServiceResponse<int>>> DeleteReservation(int id)
+        {
+            var command = new DeleteReservationCommand { Id = id };
+            var response = await _mediator.Send(command);
+            return Ok(response);
+        }
+
         // ✅ Cancel a reservation
         [HttpDelete("cancel/{id}")]
         public async Task<ActionResult<ServiceResponse<int>>> CancelReservation(int id)
@@ -41,6 +61,24 @@ namespace LibraryManagementSystem.Controllers
         {
             var command = new CompleteReservationCommand { ReservationId = id };
             var response = await _mediator.Send(command);
+            return Ok(response);
+        }
+
+        // ✅ Get all reservations
+        [HttpGet("all")]
+        public async Task<ActionResult<ServiceResponse<IEnumerable<Reservation>>>> GetAllReservations()
+        {
+            var query = new GetAllReservationsQuery();
+            var response = await _mediator.Send(query);
+            return Ok(response);
+        }
+
+        // ✅ Get reservation by ID
+        [HttpGet("{id}")]
+        public async Task<ActionResult<ServiceResponse<Reservation>>> GetReservationById(int id)
+        {
+            var query = new GetReservationByIdQuery { Id = id };
+            var response = await _mediator.Send(query);
             return Ok(response);
         }
 
