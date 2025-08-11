@@ -18,7 +18,7 @@ namespace LibraryManagementSystem.Controllers
             _mediator = mediator;
         }
 
-        // ✅ Add a reservation
+        // POST: api/reservation/add
         [HttpPost("add")]
         public async Task<ActionResult<ServiceResponse<int>>> AddReservation([FromBody] AddReservationCommand command)
         {
@@ -26,27 +26,7 @@ namespace LibraryManagementSystem.Controllers
             return Ok(response);
         }
 
-        // ✅ Update (Edit) reservation
-        [HttpPut("edit/{id}")]
-        public async Task<ActionResult<ServiceResponse<int>>> EditReservation(int id, [FromBody] UpdateReservationCommand command)
-        {
-            if (id != command.Id)
-                return BadRequest("Reservation ID mismatch.");
-
-            var response = await _mediator.Send(command);
-            return Ok(response);
-        }
-
-        // ✅ Delete reservation
-        [HttpDelete("delete/{id}")]
-        public async Task<ActionResult<ServiceResponse<int>>> DeleteReservation(int id)
-        {
-            var command = new DeleteReservationCommand { Id = id };
-            var response = await _mediator.Send(command);
-            return Ok(response);
-        }
-
-        // ✅ Cancel a reservation
+        // DELETE: api/reservation/cancel/{id}
         [HttpDelete("cancel/{id}")]
         public async Task<ActionResult<ServiceResponse<int>>> CancelReservation(int id)
         {
@@ -55,7 +35,7 @@ namespace LibraryManagementSystem.Controllers
             return Ok(response);
         }
 
-        // ✅ Complete a reservation
+        // PUT: api/reservation/complete/{id}
         [HttpPut("complete/{id}")]
         public async Task<ActionResult<ServiceResponse<int>>> CompleteReservation(int id)
         {
@@ -64,7 +44,7 @@ namespace LibraryManagementSystem.Controllers
             return Ok(response);
         }
 
-        // ✅ Get all reservations
+        // GET: api/reservation/all
         [HttpGet("all")]
         public async Task<ActionResult<ServiceResponse<IEnumerable<Reservation>>>> GetAllReservations()
         {
@@ -73,7 +53,7 @@ namespace LibraryManagementSystem.Controllers
             return Ok(response);
         }
 
-        // ✅ Get reservation by ID
+        // GET: api/reservation/{id}
         [HttpGet("{id}")]
         public async Task<ActionResult<ServiceResponse<Reservation>>> GetReservationById(int id)
         {
@@ -82,7 +62,7 @@ namespace LibraryManagementSystem.Controllers
             return Ok(response);
         }
 
-        // ✅ Get reservations by book
+        // GET: api/reservation/by-book/{bookId}
         [HttpGet("by-book/{bookId}")]
         public async Task<ActionResult<ServiceResponse<IEnumerable<Reservation>>>> GetByBook(int bookId)
         {
@@ -91,7 +71,7 @@ namespace LibraryManagementSystem.Controllers
             return Ok(response);
         }
 
-        // ✅ Get reservations by member
+        // GET: api/reservation/by-member/{memberId}
         [HttpGet("by-member/{memberId}")]
         public async Task<ActionResult<ServiceResponse<IEnumerable<Reservation>>>> GetByMember(int memberId)
         {
@@ -100,13 +80,5 @@ namespace LibraryManagementSystem.Controllers
             return Ok(response);
         }
 
-        // ✅ (Optional) Get next reservation for a book
-        [HttpGet("next/{bookId}")]
-        public async Task<ActionResult<ServiceResponse<Reservation>>> GetNextReservation(int bookId)
-        {
-            var query = new GetNextReservationQuery { BookId = bookId };
-            var response = await _mediator.Send(query);
-            return Ok(response);
-        }
     }
 }

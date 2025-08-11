@@ -1,6 +1,10 @@
 ﻿using Application.Dtos.Books;
-using Application.Services;
+using Application.Features.Reservation.Command;
+using LibraryManagementSystemUi.Services;
+using System.Collections.Generic;
+using System.Net.Http;
 using System.Net.Http.Json;
+using System.Threading.Tasks;
 
 namespace LibraryManagementSystemUi.Services
 {
@@ -13,46 +17,48 @@ namespace LibraryManagementSystemUi.Services
             _http = http;
         }
 
-        public async Task<List<ReservationDto>> GetAll()
+        public async Task<ServiceResponse<int>> AddReservationAsync(AddReservationCommand command)
         {
-            var response = await _http.GetFromJsonAsync<ServiceResponse<List<ReservationDto>>>("api/Reservation/all");
-            return response?.Data ?? new List<ReservationDto>();
+            var response = await _http.PostAsJsonAsync("api/reservation/add", command);
+            return await response.Content.ReadFromJsonAsync<ServiceResponse<int>>();
         }
 
-        public async Task<ReservationDto?> GetById(int id)
+        public async Task<ServiceResponse<int>> CancelReservationAsync(int reservationId)
         {
-            var response = await _http.GetFromJsonAsync<ServiceResponse<ReservationDto>>($"api/Reservation/{id}");
-            return response?.Data;
+            var response = await _http.DeleteAsync($"api/reservation/cancel/{reservationId}");
+            return await response.Content.ReadFromJsonAsync<ServiceResponse<int>>();
         }
 
-        public async Task<bool> Add(ReservationDto dto)
+        public async Task<ServiceResponse<int>> CompleteReservationAsync(int reservationId)
         {
-            var response = await _http.PostAsJsonAsync("api/Reservation/add", dto);
-            return response.IsSuccessStatusCode;
+            var response = await _http.PutAsync($"api/reservation/complete/{reservationId}", null);
+            return await response.Content.ReadFromJsonAsync<ServiceResponse<int>>();
         }
 
-        public async Task<bool> Update(int id, ReservationDto dto)
+        public async Task<ServiceResponse<IEnumerable<ReservationDto>>> GetAllReservationsAsync()
         {
-            var response = await _http.PutAsJsonAsync($"api/Reservation/edit/{id}", dto);
-            return response.IsSuccessStatusCode;
+            var response = await _http.GetAsync("api/reservation/all");
+            return await response.Content.ReadFromJsonAsync<ServiceResponse<IEnumerable<ReservationDto>>>();
         }
 
-        public async Task<bool> Delete(int id)
+        public async Task<ServiceResponse<ReservationDto>> GetReservationByIdAsync(int id)
         {
-            var response = await _http.DeleteAsync($"api/Reservation/delete/{id}");
-            return response.IsSuccessStatusCode;
+            var response = await _http.GetAsync($"api/reservation/{id}");
+            return await response.Content.ReadFromJsonAsync<ServiceResponse<ReservationDto>>();
         }
 
-        public async Task<bool> Cancel(int id)
+        public async Task<ServiceResponse<IEnumerable<ReservationDto>>> GetReservationsByBookAsync(int bookId)
         {
-            var response = await _http.DeleteAsync($"api/Reservation/cancel/{id}");
-            return response.IsSuccessStatusCode;
+            var response = await _http.GetAsync($"api/reservation/by-book/{bookId}");
+            return await response.Content.ReadFromJsonAsync<ServiceResponse<IEnumerable<ReservationDto>>>();
         }
 
-        public async Task<bool> Complete(int id)
+        public async Task<ServiceResponse<IEnumerable<ReservationDto>>> GetReservationsByMemberAsync(int memberId)
         {
-            var response = await _http.PutAsync($"api/Reservation/complete/{id}", null);
-            return response.IsSuccessStatusCode;
+            var response = await _http.GetAsync($"api/reservation/by-member/{memberId}");
+            return await response.Content.ReadFromJsonAsync<ServiceResponse<IEnumerable<ReservationDto>>>();
         }
+
+
     }
 }

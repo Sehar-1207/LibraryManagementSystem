@@ -1,0 +1,204 @@
+﻿@page "/reservations"
+@inject LibraryManagementSystemUi.Services.ReservationService ReservationService
+@inject NavigationManager Nav
+@inject IJSRuntime JS
+
+<div class="d-flex justify-content-center mt-4">
+    <div class="w-100 card border-0 p-2" style="max-width: 1100px;">
+        <div class="card-header bg-primary bg-gradient py-2">
+            <div class="row">
+                <div class="col-12 text-center">
+                    <h2 class="text-white py-2">Reservation List</h2>
+                </div>
+            </div>
+        </div>
+
+        <div class="card-body border p-2">
+            <div class="row pb-2">
+                <div class="col-6">
+                    <a class="btn btn-primary bg-gradient mb-2" href="/add-reservation">
+                        <i class="bi bi-plus-circle"></i> Add New Reservation
+                    </a>
+                </div>
+                <div class="col-6 text-end">
+                    <button class="btn btn-primary bg-gradient mb-2" @onclick="LoadReservations">
+                        <i class="bi bi-arrow-clockwise"></i> Refresh
+                    </button>
+                </div>
+            </div>
+
+            <!-- Search controls -->
+            <div class="row mb-3 g-2 align-items-end">
+                <div class="col-auto">
+                    <label for="searchBookId" class="form-label">Search by Book ID</label>
+                    <input type="number" class="form-control" id="searchBookId" @bind="searchBookId" />
+                </div>
+                <div class="col-auto">
+                    <button class="btn btn-primary" @onclick="SearchByBookId" disabled="@(searchBookId == null)">
+                        Search
+                    </button>
+                </div>
+
+                <div class="col-auto ms-4">
+                    <label for="searchMemberId" class="form-label">Search by Member ID</label>
+                    <input type="number" class="form-control" id="searchMemberId" @bind="searchMemberId" />
+                </div>
+                <div class="col-auto">
+                    <button class="btn btn-primary" @onclick="SearchByMemberId" disabled="@(searchMemberId == null)">
+                        Search
+                    </button>
+                </div>
+
+                <div class="col-auto ms-4">
+                    <button class="btn btn-secondary" @onclick="ResetFilters">
+                        Reset
+                    </button>
+                </div>
+            </div>
+
+            @if (reservations == null)
+            {
+                <p><em>Loading...</em></p>
+            }
+            else if (!reservations.Any())
+            {
+                <p class="text-danger"><em>No reservations found.</em></p>
+            }
+            else
+            {
+                <table class="table table-bordered table-striped">
+                    <thead class="bg-primary bg-gradient text-white">
+                        <tr>
+                            <th>Reservation ID</th>
+                            <th>Book Id</th>
+                            <th>Member Id</th>
+                            <th>Reservation Date</th>
+                            <th>Expiry Date</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var r in reservations)
+                        {
+                            <tr>
+                                <td>@r.Id</td>
+                                <td>@r.BookId</td>
+                                <td>@r.MemberId</td>
+                                <td>@r.ReservationDate.ToString("yyyy-MM-dd")</td>
+                                <td>@(r.ExpiryDate?.ToString("yyyy-MM-dd") ?? "-")</td>
+                                <td>
+                                    @if (r.IsCompleted)
+                                    {
+                                        <span class="badge bg-success">Completed</span>
+                                    }
+                                    else if (r.IsNotified)
+                                    {
+                                        <span class="badge bg-danger">Cancelled</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-warning text-dark">Pending</span>
+                                    }
+                                </td>
+                                <td>
+                                    <div class="d-flex gap-2">
+                                        <button class="btn btn-sm btn-success" @onclick="() => CompleteReservation(r.Id)" disabled="@r.IsCompleted">
+                                            <i class="bi bi-check-circle"></i> Complete
+                                        </button>
+                                        <button class="btn btn-sm btn-danger" @onclick="() => CancelReservation(r.Id)" disabled="@r.IsCompleted">
+                                            <i class="bi bi-x-circle"></i> Cancel
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            }
+        </div>
+    </div>
+</div>
+
+@code {
+    private List<ReservationDto> reservations;
+
+    private int? searchBookId;
+    private int? searchMemberId;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadReservations();
+    }
+
+    private async Task LoadReservations()
+    {
+        var response = await ReservationService.GetAllReservationsAsync();
+        reservations = response?.Data?.ToList() ?? new List<ReservationDto>();
+    }
+
+    private async Task SearchByBookId()
+    {
+        if (searchBookId == null) return;
+        var response = await ReservationService.GetReservationsByBookAsync(searchBookId.Value);
+        reservations = response?.Data?.ToList() ?? new List<ReservationDto>();
+    }
+
+    private async Task SearchByMemberId()
+    {
+        if (searchMemberId == null) return;
+        var response = await ReservationService.GetReservationsByMemberAsync(searchMemberId.Value);
+        reservations = response?.Data?.ToList() ?? new List<ReservationDto>();
+    }
+
+    private async Task ResetFilters()
+    {
+        searchBookId = null;
+        searchMemberId = null;
+        await LoadReservations();
+    }
+
+    private async Task CompleteReservation(int id)
+    {
+        var response = await ReservationService.CompleteReservationAsync(id);
+        if (response != null && response.Success)
+        {
+            var reservation = reservations.FirstOrDefault(r => r.Id == id);
+            if (reservation != null)
+            {
+                reservation.IsCompleted = true;
+            }
+            await ShowToast("Reservation completed successfully.", "success");
+            StateHasChanged();
+        }
+        else
+        {
+            await ShowToast("Failed to complete reservation.", "error");
+        }
+    }
+
+    private async Task CancelReservation(int id)
+    {
+        var response = await ReservationService.CancelReservationAsync(id);
+        if (response != null && response.Success)
+        {
+            var reservation = reservations.FirstOrDefault(r => r.Id == id);
+            if (reservation != null)
+            {
+                reservation.IsNotified = true;
+            }
+            await ShowToast("Reservation cancelled successfully.", "success");
+            StateHasChanged();
+        }
+        else
+        {
+            await ShowToast("Failed to cancel reservation.", "error");
+        }
+    }
+
+    private async Task ShowToast(string message, string type)
+    {
+        // Simple alert fallback - replace with your toast system if you want
+        await JS.InvokeVoidAsync("alert", message);
+    }
+}
