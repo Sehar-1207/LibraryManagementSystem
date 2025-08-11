@@ -1,5 +1,87 @@
-﻿<h3>BorrowIndex</h3>
+﻿@page "/BorrowIndex"
+@inject BorrowBookService BorrowRecordService
+@inject NavigationManager Nav
+
+<div class="d-flex justify-content-center mt-4">
+    <div class="w-100 card border-0 p-2" style="max-width: 1100px;">
+        <div class="card-header bg-primary bg-gradient py-2">
+            <div class="row">
+                <div class="col-12 text-center">
+                    <h2 class="text-white py-2">Borrow Records</h2>
+                </div>
+            </div>
+        </div>
+
+        <div class="card-body border p-2">
+            <div class="row pb-2">
+                <div class="col-6 offset-6 text-end">
+                    <a class="btn btn-primary bg-gradient mb-2" href="/add-borrow-record">
+                        <i class="bi bi-plus-circle"></i> Add New Record
+                    </a>
+                </div>
+            </div>
+
+            @if (borrowRecords == null)
+            {
+                <p><em>Loading...</em></p>
+            }
+            else if (!borrowRecords.Any())
+            {
+                <p class="text-danger"><em>No borrow records found.</em></p>
+            }
+            else
+            {
+                <table class="table table-bordered table-striped">
+                    <thead class="bg-primary bg-gradient text-white">
+                        <tr>
+                            <th>Record ID</th>
+                            <th>Book Id</th>
+                            <th>Member Id</th>
+                            <th>Borrow Date</th>
+                            <th>Return Date</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var record in borrowRecords)
+                        {
+                            <tr>
+                                <td>@record.Id</td>
+                                <td>@record.BookId</td>
+                                <td>@record.MemberId</td>
+                                <td>@record.BorrowDate.ToString("yyyy-MM-dd")</td>
+                                <td>@record.ReturnDate?.ToString("yyyy-MM-dd")</td>
+                                <td>Status</td>
+                                <td>
+                                    <div class="d-flex gap-2">
+                                        <a class="btn btn-sm btn-primary" href="/edit-borrow-record/@record.Id">
+                                            <i class="bi bi-pencil-square"></i> Edit
+                                        </a>
+                                        <a class="btn btn-sm btn-primary" href="/delete-borrowrecord/@record.Id">
+                                            <i class="bi bi-trash"></i> Delete
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            }
+        </div>
+    </div>
+</div>
 
 @code {
+    List<BorrowRecordDto> borrowRecords;
 
+    protected override async Task OnInitializedAsync()
+    {
+        borrowRecords = await BorrowRecordService.GetBorrowRecordsAsync();
+    }
+
+    private void NavigateToDelete(int id)
+    {
+        Nav.NavigateTo($"/delete-borrow-record/{id}");
+    }
 }

@@ -6,7 +6,10 @@ namespace Application.Features.Reservation.Command
 {
     public class AddReservationCommand : IRequest<ServiceResponse<int>>
     {
-        public ReservationDto ReservationDto { get; set; }
+        public int BookId { get; set; }
+        public int MemberId { get; set; }
+        public DateTime ReservationDate { get; set; }
+        public DateTime ExpirationDate { get; set; }
     }
 }
 

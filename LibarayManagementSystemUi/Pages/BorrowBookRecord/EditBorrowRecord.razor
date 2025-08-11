@@ -1,0 +1,117 @@
+﻿@page "/edit-borrow-record/{Id:int}"
+@using Application.Dtos.Books
+@using LibraryManagementSystemUi.Services   @* change to your actual namespace if different *@
+@using NetcodeHub.Packages.Components.Toast
+@inject BorrowBookService BorrowService
+@inject NavigationManager Nav
+
+<NetcodeHubToast @ref="ToastComponent" Position="@ToastPosition.Top()" IconClass="bi bi-info-circle" Duration="4000" />
+
+<div class="d-flex justify-content-center">
+    <div class="w-100 card border-0 p-2" style="max-width: 800px;">
+        <div class="card-header bg-warning bg-gradient py-2">
+            <h2 class="text-white text-center py-2">Edit Borrow Record</h2>
+        </div>
+
+        <div class="card-body border p-3">
+            <EditForm Model="borrowRecord" OnValidSubmit="HandleValidSubmit">
+                <DataAnnotationsValidator />
+                <ValidationSummary />
+
+                <!-- Record ID (read-only) -->
+                <div class="form-floating mb-3">
+                    <input type="text"
+                           class="form-control border shadow"
+                           @bind="borrowRecord.Id"
+                           readonly />
+                    <label class="ms-2">Record ID</label>
+                </div>
+                <!-- Book ID -->
+                <div class="form-floating mb-3">
+                    <InputNumber @bind-Value="borrowRecord.BookId" class="form-control border shadow" />
+                    <label class="ms-2">Book ID</label>
+                    <ValidationMessage For="@(() => borrowRecord.BookId)" class="text-danger" />
+                </div>
+
+                <!-- Member ID -->
+                <div class="form-floating mb-3">
+                    <InputNumber @bind-Value="borrowRecord.MemberId" class="form-control border shadow" />
+                    <label class="ms-2">Member ID</label>
+                    <ValidationMessage For="@(() => borrowRecord.MemberId)" class="text-danger" />
+                </div>
+
+                <!-- Borrow Date -->
+                <div class="form-floating mb-3">
+                    <InputDate @bind-Value="borrowRecord.BorrowDate" class="form-control border shadow" />
+                    <label class="ms-2">Borrow Date</label>
+                    <ValidationMessage For="@(() => borrowRecord.BorrowDate)" class="text-danger" />
+                </div>
+
+                <!-- Return Date -->
+                <div class="form-floating mb-3">
+                    <InputDate @bind-Value="borrowRecord.ReturnDate" class="form-control border shadow" />
+                    <label class="ms-2">Return Date</label>
+                    <ValidationMessage For="@(() => borrowRecord.ReturnDate)" class="text-danger" />
+                </div>
+
+                <div class="row pt-2 justify-content-center">
+                    <div class="col-6 col-md-4">
+                        <button type="submit" class="btn btn-warning w-100">
+                            <i class="bi bi-pencil-square"></i> Update
+                        </button>
+                    </div>
+                    <div class="col-6 col-md-4">
+                        <button type="button" class="btn btn-secondary w-100" @onclick="GoBack">
+                            <i class="bi bi-x-circle"></i> Cancel
+                        </button>
+                    </div>
+                </div>
+            </EditForm>
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter]
+    public int Id { get; set; }
+
+    private BorrowRecordDto borrowRecord = new();
+    NetcodeHubToast? ToastComponent;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var record = await BorrowService.GetBorrowRecordByIdAsync(Id);
+        if (record != null)
+        {
+            borrowRecord = record;
+        }
+        else
+        {
+            // Initialize with defaults if not found
+            borrowRecord = new BorrowRecordDto
+            {
+                Id = Id,
+                BorrowDate = DateTime.Now
+            };
+        }
+    }
+
+    private async Task HandleValidSubmit()
+    {
+        var response = await BorrowService.UpdateBorrowRecordAsync(Id, borrowRecord);
+        if (response.IsSuccessStatusCode)
+        {
+            await ToastComponent!.ShowSuccessToast("Updated", "Borrow record updated successfully!");
+            Nav.NavigateTo("/BorrowIndex");
+        }
+        else
+        {
+            await ToastComponent!.ShowErrorToast("Error", "Failed to update borrow record.");
+        }
+    }
+
+    private void GoBack()
+    {
+        Nav.NavigateTo("/BorrowIndex");
+    }
+}

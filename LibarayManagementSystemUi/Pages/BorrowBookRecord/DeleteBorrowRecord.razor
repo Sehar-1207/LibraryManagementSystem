@@ -1,0 +1,84 @@
+﻿@page "/delete-borrowrecord/{id:int}"
+@using NetcodeHub.Packages.Components.Toast
+@inject BorrowBookService BorrowRecordService
+@inject NavigationManager Nav
+
+<NetcodeHubToast @ref="ToastComponent" Position="@ToastPosition.Top()" IconClass="bi bi-check" Persist="false" Duration="4000" />
+
+<div class="d-flex justify-content-center">
+    <div class="w-100 card border-0 p-2" style="max-width: 500px;">
+        <div class="card-header bg-danger bg-gradient py-2">
+            <h2 class="text-white text-center py-2">Delete Borrow Record</h2>
+        </div>
+
+        <div class="card-body border p-3 text-center">
+            @if (borrowRecord != null)
+            {
+                <div class="mb-3 text-start">
+                    <strong>ID:</strong> @borrowRecord.Id <br />
+                    <strong>Book Title:</strong> @borrowRecord.BookId <br />
+                    <strong>Member Name:</strong> @borrowRecord.MemberId <br />
+                    <strong>Borrow Date:</strong> @borrowRecord.BorrowDate.ToShortDateString() <br />
+                    @if (borrowRecord.ReturnDate != null)
+                    {
+                        <strong>Return Date:</strong> @borrowRecord.ReturnDate?.ToShortDateString() <br />
+                    }
+                </div>
+
+                <p class="fw-bold text-danger">Are you sure you want to delete this borrow record?</p>
+
+                <div class="row justify-content-center">
+                    <div class="col-6 col-md-4">
+                        <button class="btn btn-danger w-100" @onclick="DeleteBorrowBookRecord">
+                            <i class="bi bi-trash"></i> Delete
+                        </button>
+                    </div>
+                    <div class="col-6 col-md-4">
+                        <button class="btn btn-secondary w-100" @onclick="GoBack">
+                            <i class="bi bi-x-circle"></i> Cancel
+                        </button>
+                    </div>
+                </div>
+            }
+            else
+            {
+                <p>Loading borrow record details...</p>
+            }
+        </div>
+    </div>
+</div>
+
+@code {
+    NetcodeHubToast? ToastComponent;
+    [Parameter] public int id { get; set; }
+    private BorrowRecordDto? borrowRecord;
+
+    protected override async Task OnInitializedAsync()
+    {
+        borrowRecord = await BorrowRecordService.GetBorrowRecordByIdAsync(id);
+        if (borrowRecord == null)
+        {
+            await ToastComponent!.ShowErrorToast("Error", "Borrow record not found.");
+            Nav.NavigateTo("/BorrowIndex");
+        }
+    }
+
+    private async Task DeleteBorrowBookRecord()
+    {
+        var response = await BorrowRecordService.DeleteBorrowRecordAsync(id);
+        if (response.IsSuccessStatusCode)
+        {
+            await ToastComponent!.ShowSuccessToast("Success", "Borrow record deleted successfully!");
+            Nav.NavigateTo("/BorrowIndex");
+        }
+        else
+        {
+            await ToastComponent!.ShowErrorToast("Error", "Failed to delete borrow record.");
+        }
+    }
+
+    private void GoBack()
+    {
+        Nav.NavigateTo("/BorrowIndex");
+    }
+}

@@ -1,0 +1,57 @@
+﻿@page "/add-borrow-record"
+@using Application.Dtos.Books
+@inject BorrowBookService BorrowBookService
+@inject NavigationManager NavManager
+@using NetcodeHub.Packages.Components.Toast
+
+<NetcodeHubToast @ref="ToastComponent" Position="@ToastPosition.Top()" IconClass="bi bi-info-circle" Persist="false" Duration="4000" />
+
+<h3>Add Borrow Record</h3>
+
+<EditForm Model="@borrowRecord" OnValidSubmit="HandleValidSubmit">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    <div class="mb-3">
+        <label for="bookId" class="form-label">Book ID</label>
+        <InputNumber id="bookId" @bind-Value="borrowRecord.BookId" class="form-control" />
+    </div>
+
+    <div class="mb-3">
+        <label for="memberId" class="form-label">Member ID</label>
+        <InputNumber id="memberId" @bind-Value="borrowRecord.MemberId" class="form-control" />
+    </div>
+
+    <div class="mb-3">
+        <label for="borrowDate" class="form-label">Borrow Date</label>
+        <InputDate @bind-Value="borrowRecord.BorrowDate" class="form-control" />
+    </div>
+
+    <div class="mb-3">
+        <label for="returnDate" class="form-label">Return Date</label>
+        <InputDate @bind-Value="borrowRecord.ReturnDate" class="form-control" />
+    </div>
+
+    <button type="submit" class="btn btn-primary">Add Record</button>
+</EditForm>
+
+@code {
+    private BorrowRecordDto borrowRecord = new BorrowRecordDto();
+    private NetcodeHubToast? ToastComponent;
+
+    private async Task HandleValidSubmit()
+    {
+        var response = await BorrowBookService.CreateBorrowRecordAsync(borrowRecord);
+
+        if (response.IsSuccessStatusCode)
+        {
+            ToastComponent?.ShowSuccessToast("Success", "Borrow record added successfully!");
+            await Task.Delay(1500);
+            NavManager.NavigateTo("/BorrowIndex");
+        }
+        else
+        {
+            ToastComponent?.ShowErrorToast("Error", $"Failed to add record. Status: {response.StatusCode}");
+        }
+    }
+}

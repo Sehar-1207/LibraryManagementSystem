@@ -16,7 +16,7 @@ namespace Application.Features.Reservation.Handler
 
         public async Task<ServiceResponse<int>> Handle(AddReservationCommand request, CancellationToken cancellationToken)
         {
-            var book = await _unitOfWork.Books.GetByIdAsync(request.ReservationDto.BookId, cancellationToken);
+            var book = await _unitOfWork.Books.GetByIdAsync(request.BookId, cancellationToken);
             if (book == null)
             {
                 return new ServiceResponse<int>
@@ -39,9 +39,10 @@ namespace Application.Features.Reservation.Handler
 
             var reservation = new Domain.Entities.Reservation
             {
-                BookId = request.ReservationDto.BookId,
-                MemberId = request.ReservationDto.MemberId,
-                ReservationDate = DateTime.UtcNow
+                BookId = request.BookId,
+                MemberId = request.MemberId,
+                ReservationDate = DateTime.UtcNow,
+                ExpiryDate = request.ExpirationDate
             };
 
             await _unitOfWork.Reserv.AddAsync(reservation, cancellationToken);

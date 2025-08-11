@@ -27,13 +27,15 @@ namespace LibraryManagementSystem.Controllers
         }
 
         // PUT: api/BorrowingRecord
-        [HttpPut]
-        public async Task<IActionResult> UpdateRecord([FromBody] BorrowRecordDto dto, CancellationToken cancellationToken)
+        [HttpPut("{id}")]
+        public async Task<IActionResult> UpdateRecord(int id, [FromBody] BorrowRecordDto dto, CancellationToken cancellationToken)
         {
+            dto.Id = id; // ensure the dto gets the route id
             var command = new UpdateRecordCommand(dto);
             var result = await _mediator.Send(command, cancellationToken);
             return Ok(result);
         }
+
 
         // DELETE: api/BorrowingRecord/{id}
         [HttpDelete("{id}")]
